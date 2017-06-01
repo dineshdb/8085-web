@@ -1,11 +1,11 @@
 # 8085-web
 8085 simulator on the web. See the simulator [here](https://dineshdb.github.io/8085-web/)
 
-# Targets
+## Targets
 * Cross platform
 * Responsive Web Interface
 
-# Roadmap
+## Roadmap
 - [ ] Implement mnemonics parsing
   - [x] aci
   - [x] adi
@@ -19,8 +19,8 @@
   - [ ] Simulator
   
 
-# Contributors
+## Contributors
 * **Dinesh Bhattarai**
 
-# License
+## License
 GNU GPLv3
