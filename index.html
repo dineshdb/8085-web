@@ -4,12 +4,42 @@
     <title> 8085 Simulator </title>
     <script src="js/parser.js"></script>
     <script src="js/8085sim.js"></script>
-    <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
+<style>
+textarea {
+  height: 50vh;
+  width: 50%;
+}
+</style>
   </head>
   <body>
-  	Welcome to 8085 simulator.
-  </body>
-</html>
+  <div class="container-fluid">
+    <div class="row">
+    	<button class="btn btn-primary col-sm-3" onclick="parseInput()" onpaste="parseInput()" oncut="parseInput()"> Execute </button>
+    	<button class="btn btn-primary col-sm-3"> Step </button>
+    	<button class="btn btn-primary col-sm-3"> Execute with steps</button>
+    </div>
+  	<div class="row">
+      <textarea id="code" class="col-xs-12 col-md-6" onblur="parseInput()"></textarea>
+      <textarea id="memory" class="col-xs-12 col-md-6" readonly></textarea>
+  	</div>
+  </div>
+</body>
+<script>
+var input = document.getElementById("code")
+var output = document.getElementById("memory")
+let memBaseAddress = 8000
+let code, mem=""
+function parseInput(){
+	code = parse(input.value)
+	let addr = memBaseAddress
+	let out = "Address \t Line \t Hex Code\n"
+	for(let c of code){
+		out += `${addr} \t ${c.lineNumber} \t\t ${c.code}\n`
+		addr += c.bytes
+	}
+	output.value = out
+}
+</script> 
 
+</html>

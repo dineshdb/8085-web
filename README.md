@@ -6,8 +6,13 @@
 * Responsive Web Interface
 
 # Roadmap
-- [ ] Design the parser/assembler
-  - [x] Implement mov mnemonics
+- [ ] Implement mnemonics parsing
+  - [x] aci
+  - [x] adi
+  - [x] di
+  - [x] ei
+  - [x] hlt
+  - [x] mov
 - [ ] Design the interpreter/simulator
 - [ ] Design a responsive web interface.
   - [ ] Editor
