@@ -1,31 +1,12 @@
+
 let isRegisterName = (reg) => "abcdehl".indexOf(reg) !== -1
-let i2h = i => i
-let h2i = h => i
+let registerIndex = reg => "abcdehlm".indexOf(reg)
+let addArg1 = mn => arg=> [mn, arg[1]]
+let addArg2 = mn => arg=> [mn, littleEndian(arg[1])]
+let addMap  = arg=> [mnemonics[arg[0]][registerIndex(arg[1])]]
+
+
 let aCharCode = "a".charCodeAt(0)
-
-// TODO: LXI, MVI, ORA, POP, PUSH, RST, SBB, STAX, SUB, xra
-
-let mov = {// a		b	 c 		d	  e	   f	g	h    l		m
-		a: 	["7f", "78", "79", "7a", "7b", null, null, "7c", "7d", "77"],
-		b:	["47", "40", "41", "42", "43", null, null, "44", "45", "70"],
-		c:	["41", "48", "49", "4a", "4b", null, null, "4c", "4d", "71"],
-		d:	["57", "50", "51", "52", "53", null, null, "54", "55", "72"],
-		e:	["5f", "58", "59", "5a", "5b", null, null, "5c", "5d", "73"],
-		h:	["67", "60", "61", "62", "63", null, null, "64", "65", "74"],
-		l:	["6f", "68", "69", "6a", "6b", null, null, "6c", "6d", "75"],
-		m:	["7e", "46", "4e", "56", "5e", null, null, "66", "6e"]
-}
-
-let add = {a : "87", b : "80", c : "81", d :"82", e:"83", h:"84", l:"85", m : "86" }
-let adc = {a : "8f", b : "88", c : "89", d :"8a", e:"8b", h:"8c", l:"8d", m : "8e" }
-let ana = {a : "a7", b : "a0", c : "a1", d :"a2", e:"a3", h:"a4", l:"a5", m : "a6" }
-let cmp = {a : "bf", b : "b8", c : "b9", d :"ba", e:"bb", h:"bc", l:"bd", m : "be" }
-let dad = {bc: "09", de: "19", hl: "29", sp:"39"}
-let dcr = {a : "3d", b : "05", c : "0d", d :"15", e:"1d", h:"25", l:"2d", m : "35" }
-let dcx = {bc: "0b", de: "1b", hl: "2b", sp:"3b"}
-let inr = {a : "3c", b : "04", c : "0c", d :"14", e:"1c", h:"24", l:"2c", m : "34" }
-let inx = {bc: "03", de: "13", hl: "23", sp:"33"}
-let ldax = {bc: "0a", de: "1a"}
 
 function littleEndian(str){
 	if(str.length !== 4)
@@ -35,71 +16,92 @@ function littleEndian(str){
 	return [bb, aa]
 }
 
-let byte3 = {
-
+let mnemonics = {
+    	// a,	b,	  c		d	  e		h	  l		m
+	add: ["87", "80", "81", "82", "83", "84", "85", "86"],
+	adc: ["8f", "88", "89", "8a", "8b", "8c", "8d", "8e"],
+	ana: ["a7", "a0", "a1", "a2", "a3", "a4", "a5", "a6"],
+	cmp: ["bf", "b8", "b9", "ba", "bb", "bc", "bd", "be"],
+	dcr: ["3d", "05", "0d", "15", "1d", "25", "2d", "35"],
+    inr: ["3c", "04", "0c", "14", "1c", "24", "2c", "34"],
+    mov : 
+    [
+	    ["7f", "78", "79", "7a", "7b", "7c", "6f", "77"],
+    	["47", "40", "41", "42", "43", "44", "45", "70"],
+    	["41", "48", "49", "4a", "4b", "4c", "4d", "71"],
+		["57", "50", "51", "52", "53", "54", "55", "72"],
+		["5f", "58", "59", "5a", "5b", "5c", "5d", "73"],
+		["67", "60", "61", "62", "63", "64", "65", "74"],
+		["7d", "68", "69", "6a", "6b", "6c", "6d", "75"],
+		["7e", "46", "4e", "56", "5e", "66", "6e"]
+    ],
+    mvi:["3e", "06", "0e", "16", "1e", "26", "2e", "36"],
+	ora:["b7", "b0", "b1", "b2", "b3", "b4", "b5", "b6"],
+	rst:["c7", "cf", "d7", "df", "e7", "ef", "f7", "ff"],
+	sub:["97", "90", "91", "92", "93", "94", "95", "96"],
+	sbb:["9f", "98", "99", "9a", "9b", "9c", "9d", "9e"],
+	xra:["af", "a8", "a9", "aa", "ab", "ac", "ad", "ae"],
 }
 
+let dad = {bc: "09", de: "19", hl: "29", sp:"39"}
+let dcx = {bc: "0b", de: "1b", hl: "2b", sp:"3b"}
+let inx = {bc: "03", de: "13", hl: "23", sp:"33"}
+let ldax = {bc: "0a", de: "1a"}
+let lxi = { b : '01', d: '11', h:'21', sp : '31' }
+let stax = { b : '02', d : '12' }
+let push = { b : 'c5', d : 'd5', h: 'e5', psw : 'f5' }
+let pop = { b : 'c1', d : 'd1', h: 'e1', psw : 'f1' }
+
 let mnmap = {
-	"aci" : arg => ["ce", arg[1]],
-	"adc" : arg => adc[arg[1]] ? adc[arg[1]] : [],
-	"add" : arg => add[arg[1]] ? add[arg[1]] : [],
-	"adi" : arg => ["c6", arg[1]],
-	"ana" : arg => ana[arg[1]] ? ana[arg[1]] : [],
-	"ani" : arg => ["e6", arg[1]],
-	"call": arg => ["cd", littleEndian(arg[1])],
-	"cc"  : arg => ["dc", littleEndian(arg[1])],
-	"cnc" : arg => ["d4", littleEndian(arg[1])],
-	"cp"  : arg => ["f4", littleEndian(arg[1])],
-	"cm"  : arg => ["fc", littleEndian(arg[1])],
-	"cma" : "2f",
-	"cmc" : "3f",
-	"cpe" : arg => ["ec", littleEndian(arg[1])],
-	"cpo" : arg => ["e4", littleEndian(arg[1])],
-	"cpi" : arg => ["fe", arg[1]],
-	"cz"  : arg => ["cc", littleEndian(arg[1])],
-	"cnz" : arg => ["c4", littleEndian(arg[1])],
-	"daa" : "27",
-	"dad" : arg => [dad[arg[1]]],
-	"dcr" : arg => [dcr[arg[1]]],
-	"dcx" : arg => [dcx[arg[1]]],
-	"di"  : "f3",
-	"ei"  : "fb",
-	"hlt" : "76",
-	"in"  : arg => ["db", arg[1]],
-	"inr" : arg => [inr[arg[1]]],
-	"inx" : arg => [inx[arg[1]]],
-	"jmp" : arg => ["c3", littleEndian(arg[1])],
-	"jc"  : arg => ["da", littleEndian(arg[1])],
-	"jnc" : arg => ["d2", littleEndian(arg[1])],
-	"jp"  : arg => ["f2", littleEndian(arg[1])],
-	"jm"  : arg => ["ec", littleEndian(arg[1])],
-	"jpe" : arg => ["ea", littleEndian(arg[1])],
-	"jpo" : arg => ["e2", littleEndian(arg[1])],
-	"jz"  : arg => ["ca", littleEndian(arg[1])],
-	"jnz" : arg => ["c2", littleEndian(arg[1])],
-	"lda" : arg => ["3a", littleEndian(arg[1])],
-	"ldax": arg => [ldax[arg[1]]],
-	"lhld": arg => ["2a", littleEndian(arg[1])],
-	"mov" : function(args){
-		// TODO: syntax checking
-
-		let source = args[2], dest = args[1]
-		let isregS = isRegisterName(source)
-		let isregD = isRegisterName(dest)
-
-		if(isregS){
-			if(isregD){
-				return [mov[source][dest.charCodeAt(0) - aCharCode]]
-			} else {
-				return [mov[source][9]]
-			}
-		} else {
-			return [mov["m"][dest.charCodeAt(0) - aCharCode]]
-		}
-	},
+	"aci"  : addArg1("ce"),
+	"adc"  : addMap,
+	"add"  : addMap,
+	"adi"  : addArg1("c6"),
+	"ana"  : addMap,
+	"ani"  : addArg1("e6"),
+	"call" : addArg2("cd"),
+	"cc"   : addArg2("dc"),
+	"cnc"  : addArg2("d4"),
+	"cp"   : addArg2("f4"),
+	"cm"   : addArg2("fc"),
+	"cma"  : "2f",
+	"cmc"  : "3f",
+	"cpe"  : addArg2("ec"),
+	"cpo"  : addArg2("e4"),
+	"cpi"  : addArg1("fe"),
+	"cz"   : addArg2("cc"),
+	"cnz"  : addArg2("c4"),
+	"daa"  : "27",
+	"dad"  : arg => [dad[arg[1]]],
+	"dcr"  : addMap,
+	"dcx"  : arg => [dcx[arg[1]]],
+	"di"   : "f3",
+	"ei"   : "fb",
+	"hlt"  : "76",
+	"in"   : addArg1("db"),
+	"inr"  : addMap,
+	"inx"  : arg => [inx[arg[1]]],
+	"jmp"  : addArg2("c3"),
+	"jc"   : addArg2("da"),
+	"jnc"  : addArg2("d2"),
+	"jp"   : addArg2("f2"),
+	"jm"   : addArg2("ec"),
+	"jpe"  : addArg2("ea"),
+	"jpo"  : addArg2("e2"),
+	"jz"   : addArg2("ca"),
+	"jnz"  : addArg2("c2"),
+	"lda"  : addArg2("3a"),
+	"ldax" : arg => [ldax[arg[1]]],
+	"lhld" : addArg2("2a"),
+	"lxi"  : arg => [lxi[arg[1]], littleEndian(arg[2])],
+	"mov"  : arg => mnemonics.mov[registerIndex(arg[2])][registerIndex(arg[1])],
+	mvi    : arg => [mnemonics.mvi[registerIndex(arg[1])], arg[2]],
 	"nop"  : "00",
-	"out"  : arg => ["db", arg[1]],
+	ora    : addMap,
+	"out"  : addArg1("d3"),
 	"pchl" : "e9",
+	push   : arg => [push[arg[1]]],
+	pop    : arg => [pop[arg[1]]],
 	"ral"  : "17",
 	"rar"  : "1f",
 	"rlc"  : "07",
@@ -114,15 +116,19 @@ let mnmap = {
 	"rz"   : "c8",
 	"rnz"  : "c0",
 	"rim"  : "20",
-	"sbi"  : arg => ["de", arg[1]],
-	"sui"  : arg => ["d6", arg[1]],
-	"shld" : arg => ["22", littleEndian(arg[1])],
-	"sim"  : arg => "30",
+	rst    : arg => mnemonics.rst[arg[1]],
+	sbb    : addMap,
+	"sbi"  : addArg1("d3"),
+	sub    : addMap,
+	"sui"  : addArg1("d6"),
+	"shld" : addArg2("22"),
+	"sim"  : "30",
 	"sphl" : "f9",
-	"sta" : arg => ["32", littleEndian(arg[1])],
+	"sta"  : addArg2("32"),
+	stax   : arg => [stax[arg[1]]],
 	"stc"  : "37",
 	"xchg" : "eb",
-	"xri"  : arg => ["ee", arg[1]],
+	"xri"  : addArg1("ee"),
 	"xthl" : "e3"
 }
 
