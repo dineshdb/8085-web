@@ -15,13 +15,12 @@ textarea {
   <body>
   <div class="container-fluid">
     <div class="row">
-    	<button class="btn btn-primary col-sm-3" onclick="parseInput()" onpaste="parseInput()" oncut="parseInput()"> Execute </button>
-    	<button class="btn btn-primary col-sm-3"> Step </button>
-    	<button class="btn btn-primary col-sm-3"> Execute with steps</button>
+		8085 Simulator
     </div>
   	<div class="row">
-      <textarea id="code" class="col-xs-12 col-md-6" onblur="parseInput()"></textarea>
-      <textarea id="memory" class="col-xs-12 col-md-6" readonly></textarea>
+      <textarea id="code" class="col-xs-12 col-md-6" onblur="parseInput()" onpaste="parseInput()" 
+      		placeholder="Type your code here"></textarea>
+      <textarea id="memory" class="col-xs-12 col-md-6" readonly placeholder="Output will be here"></textarea>
   	</div>
   </div>
 </body>
@@ -33,9 +32,9 @@ let code, mem=""
 function parseInput(){
 	code = parse(input.value)
 	let addr = memBaseAddress
-	let out = "Address \t Line \t Hex Code\n"
+	let out = "Line \t Address \t Hex Code\n"
 	for(let c of code){
-		out += `${addr} \t ${c.lineNumber} \t\t ${c.code}\n`
+		out += `${c.lineNumber} \t\t ${addr} \t ${c.code}\n`
 		addr += c.bytes
 	}
 	output.value = out
